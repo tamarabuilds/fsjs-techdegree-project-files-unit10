@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
+import UserContext from "./context/UserContext";
 
 // App Components
 import Header from "./components/Header";
@@ -42,31 +43,37 @@ function App() {
   }
 
   return (
-    <div>
-      <Header
-        user={user}
-        accentColor={accentColor} />
-      <Routes>
-        <Route path="/" element={<Home user={user} />} />
-        <Route path="signin" element={
-          <UserSignIn
-            signIn={signInUser}
-            accentColor={accentColor} />
-        } />
-        <Route path="signout" element={<UserSignOut signOut={signOutUser} />} />
-        <Route path="settings" element={
-          <Settings
-            user={user}
-            isDarkMode={isDarkMode}
-            toggleDarkMode={toggleDarkMode}
-            accentColor={accentColor}
-            updateAccentColor={setAccentColor}
-            fontPercentage={fontPercentage}
-            updateFontPercentage={setFontPercentage} />
-        } />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </div>
+    <UserContext.Provider value={ {
+        user,
+        //  to pass a function down through context, add actions and reference a function
+        actions: {
+          signIn: signInUser,
+          signOut: signOutUser
+        }
+      } }>
+      <div>
+        {console.log(UserContext)}
+        <Header
+          accentColor={accentColor} />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="signin" element={
+            <UserSignIn accentColor={accentColor} />
+          } />
+          <Route path="signout" element={<UserSignOut />} />
+          <Route path="settings" element={
+            <Settings
+              isDarkMode={isDarkMode}
+              toggleDarkMode={toggleDarkMode}
+              accentColor={accentColor}
+              updateAccentColor={setAccentColor}
+              fontPercentage={fontPercentage}
+              updateFontPercentage={setFontPercentage} />
+          } />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </div>
+    </UserContext.Provider>
   );
 }
 
