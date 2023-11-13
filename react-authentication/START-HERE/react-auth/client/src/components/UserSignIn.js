@@ -1,10 +1,13 @@
 import { useContext, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+
 import ThemeContext from '../context/ThemeContext';
+import UserContext from '../context/UserContext';
 
 const UserSignIn = () => {
+  const { actions } = useContext(UserContext);
   const { accentColor } = useContext(ThemeContext);
-  const naviagate = useNavigate(); 
+  const navigate = useNavigate(); 
 
   // State
   const username = useRef(null);
@@ -20,33 +23,18 @@ const UserSignIn = () => {
       password: password.current.value,
     };
 
-    // encoding user credentials following the basic authentication scheme requirement
-    // btoa() creates a base 64 endoded ASCII string from a string of data
-    // basic authentication requires the username and password to be separated by a colon :  
-    const encodedCredentials = btoa(`${credentials.username}:${credentials.password }`);
 
-    const fecthOptions = {
-      method: "GET",
-      headers: {
-        Authorization: `Basic ${encodedCredentials}`
-      },
-    }
 
     try {
-      const response = await fetch("http://localhost:5000/api/users", fecthOptions);
-      // console.log(response)
-      if (response.status === 200){
-        const user = await response.json();
-        console.log(`SUCCESS! ${user.username} is now signed in!`);
-        naviagate('/authenticated');
-      } else if (response.status === 401){
-        setErrors(["Sign in was unsuccessful"]);
+      const user = await actions.signIn(credentials);
+      if (user){
+        navigate('/authenticated')
       } else {
-        throw new Error()
+        setErrors([`Sign in was unsuccessful`])
       }
     } catch (error) {
       console.log(error);
-      naviagate('/error');
+      navigate('/error');
     }
 
   }
@@ -54,7 +42,7 @@ const UserSignIn = () => {
   const handleCancel = (event) => {
     event.preventDefault();
     // navigate back to the root if the user clicks 'cancel'
-    naviagate('/');
+    navigate('/');
   }
 
   return (
