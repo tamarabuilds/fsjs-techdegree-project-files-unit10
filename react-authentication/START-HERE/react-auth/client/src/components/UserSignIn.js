@@ -1,5 +1,5 @@
 import { useContext, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 import ThemeContext from '../context/ThemeContext';
 import UserContext from '../context/UserContext';
@@ -8,6 +8,8 @@ const UserSignIn = () => {
   const { actions } = useContext(UserContext);
   const { accentColor } = useContext(ThemeContext);
   const navigate = useNavigate(); 
+  const location = useLocation();
+  // console.log(location)
 
   // State
   const username = useRef(null);
@@ -17,6 +19,10 @@ const UserSignIn = () => {
   // Event Handlers
   const handleSubmit = async (event) => {
     event.preventDefault();
+    let from = '/authenticated';
+    if (location.state) {
+      from = location.state.from
+    }
 
     const credentials = {
       username: username.current.value,
@@ -28,7 +34,7 @@ const UserSignIn = () => {
     try {
       const user = await actions.signIn(credentials);
       if (user){
-        navigate('/authenticated')
+        navigate(from);
       } else {
         setErrors([`Sign in was unsuccessful`])
       }
