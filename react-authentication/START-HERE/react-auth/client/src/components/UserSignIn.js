@@ -1,9 +1,10 @@
 import { useContext, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ThemeContext from '../context/ThemeContext';
 
 const UserSignIn = () => {
   const { accentColor } = useContext(ThemeContext);
+  const naviagate = useNavigate(); 
 
   // State
   const username = useRef(null);
@@ -11,14 +12,49 @@ const UserSignIn = () => {
   const [errors, setErrors] = useState([]);
 
   // Event Handlers
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+
+    const credentials = {
+      username: username.current.value,
+      password: password.current.value,
+    };
+
+    // encoding user credentials following the basic authentication scheme requirement
+    // btoa() creates a base 64 endoded ASCII string from a string of data
+    // basic authentication requires the username and password to be separated by a colon :  
+    const encodedCredentials = btoa(`${credentials.username}:${credentials.password }`);
+
+    const fecthOptions = {
+      method: "GET",
+      headers: {
+        Authorization: `Basic ${encodedCredentials}`
+      },
+    }
+
+    try {
+      const response = await fetch("http://localhost:5000/api/users", fecthOptions);
+      // console.log(response)
+      if (response.status === 200){
+        const user = await response.json();
+        console.log(`SUCCESS! ${user.username} is now signed in!`);
+        naviagate('/authenticated');
+      } else if (response.status === 401){
+        setErrors(["Sign in was unsuccessful"]);
+      } else {
+        throw new Error()
+      }
+    } catch (error) {
+      console.log(error);
+      naviagate('/error');
+    }
 
   }
 
   const handleCancel = (event) => {
     event.preventDefault();
-
+    // navigate back to the root if the user clicks 'cancel'
+    naviagate('/');
   }
 
   return (
