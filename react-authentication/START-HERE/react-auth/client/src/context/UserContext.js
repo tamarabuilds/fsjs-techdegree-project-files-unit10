@@ -1,5 +1,6 @@
 import { createContext, useState } from "react";
 import Cookies from "js-cookie";
+import { api } from "../utils/apiHelper";
 
 const UserContext = createContext(null);
 
@@ -12,17 +13,10 @@ export const UserProvider = (props) => {
     // encoding user credentials following the basic authentication scheme requirement
     // btoa() creates a base 64 endoded ASCII string from a string of data
     // basic authentication requires the username and password to be separated by a colon :  
-    const encodedCredentials = btoa(`${credentials.username}:${credentials.password }`);
-
-    const fecthOptions = {
-      method: "GET",
-      headers: {
-        Authorization: `Basic ${encodedCredentials}`
-      },
-    }
+    
 
 
-    const response = await fetch("http://localhost:5000/api/users", fecthOptions);
+    const response = await api('/users', 'GET', null, credentials);
     // console.log(response)
     if (response.status === 200){
       const user = await response.json();
